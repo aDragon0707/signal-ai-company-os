@@ -1,0 +1,21 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Generated caches
+__pycache__/
+.pytest_cache/
+node_modules/
+dist/
+build/
+
+# Local-only exports
+*.bak
+*.local.*

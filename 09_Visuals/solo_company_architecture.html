@@ -1,0 +1,1304 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>一人公司 AI 操作系统架构</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: oklch(0.975 0.008 83);
+      --ink: oklch(0.205 0.018 252);
+      --muted: oklch(0.46 0.025 252);
+      --line: oklch(0.845 0.025 252);
+      --soft: oklch(0.935 0.014 83);
+      --blue: oklch(0.53 0.135 250);
+      --blue-soft: oklch(0.91 0.045 250);
+      --green: oklch(0.56 0.115 158);
+      --green-soft: oklch(0.91 0.045 158);
+      --red: oklch(0.55 0.145 24);
+      --red-soft: oklch(0.925 0.05 24);
+      --amber: oklch(0.68 0.13 76);
+      --amber-soft: oklch(0.925 0.055 76);
+      --violet: oklch(0.52 0.12 302);
+      --violet-soft: oklch(0.925 0.04 302);
+      --shadow: 0 18px 50px oklch(0.2 0.018 252 / 0.12);
+      --radius: 8px;
+      --mono: "SFMono-Regular", "Cascadia Code", Consolas, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(90deg, oklch(0.88 0.012 83 / 0.36) 1px, transparent 1px),
+        linear-gradient(0deg, oklch(0.88 0.012 83 / 0.36) 1px, transparent 1px),
+        var(--paper);
+      background-size: 34px 34px;
+      color: var(--ink);
+      font-family: var(--sans);
+      letter-spacing: 0;
+    }
+
+    .page {
+      width: min(1480px, calc(100vw - 36px));
+      margin: 0 auto;
+      padding: 36px 0 56px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 28px;
+      margin-bottom: 28px;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 5.2vw, 78px);
+      line-height: 0.95;
+      font-weight: 850;
+      max-width: 860px;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.6;
+      max-width: 760px;
+    }
+
+    .stamp {
+      border: 2px solid var(--ink);
+      padding: 14px 16px;
+      min-width: 260px;
+      background: oklch(0.985 0.006 83);
+      box-shadow: 8px 8px 0 var(--amber-soft);
+    }
+
+    .stamp strong {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .stamp span {
+      font-family: var(--mono);
+      font-size: 15px;
+    }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+
+    .principle {
+      border: 1px solid var(--line);
+      background: oklch(0.985 0.006 83 / 0.82);
+      padding: 14px;
+      min-height: 88px;
+    }
+
+    .principle b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .principle p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    section {
+      margin-top: 28px;
+      border: 2px solid var(--ink);
+      background: oklch(0.985 0.006 83 / 0.9);
+      box-shadow: var(--shadow);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      border-bottom: 2px solid var(--ink);
+      padding: 18px;
+      background: var(--soft);
+    }
+
+    .num {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--ink);
+      font-family: var(--mono);
+      font-weight: 800;
+      background: var(--paper);
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(21px, 2.1vw, 32px);
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 12px;
+      border: 1px solid var(--ink);
+      padding: 7px 9px;
+      background: var(--paper);
+      white-space: nowrap;
+    }
+
+    .panel {
+      padding: 22px;
+      overflow-x: auto;
+    }
+
+    .org {
+      min-width: 1180px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .ceo {
+      border: 2px solid var(--ink);
+      background: var(--amber-soft);
+      padding: 18px;
+      display: grid;
+      align-content: center;
+      min-height: 430px;
+      position: relative;
+    }
+
+    .ceo:after {
+      content: "";
+      position: absolute;
+      right: -26px;
+      top: 50%;
+      width: 26px;
+      height: 2px;
+      background: var(--ink);
+    }
+
+    .role-title {
+      font-size: 28px;
+      line-height: 1.05;
+      font-weight: 850;
+      margin: 0 0 12px;
+    }
+
+    .role-desc {
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 0 0 18px;
+      font-size: 14px;
+    }
+
+    .micro-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .micro-list li {
+      border: 1px solid oklch(0.55 0.04 76);
+      background: oklch(0.97 0.025 76);
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    .layers {
+      display: grid;
+      gap: 14px;
+    }
+
+    .layer {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .layer-label {
+      border: 2px solid var(--ink);
+      padding: 14px;
+      display: grid;
+      align-content: center;
+      font-weight: 820;
+      font-size: 16px;
+      background: var(--paper);
+    }
+
+    .layer-label small {
+      margin-top: 7px;
+      color: var(--muted);
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    .workers {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .worker {
+      border: 1px solid var(--line);
+      background: oklch(0.99 0.004 83);
+      padding: 12px;
+      min-height: 108px;
+      position: relative;
+    }
+
+    .worker.control { background: var(--blue-soft); }
+    .worker.tech { background: var(--green-soft); }
+    .worker.growth { background: var(--violet-soft); }
+    .worker.sales { background: var(--red-soft); }
+
+    .worker b {
+      display: block;
+      font-size: 13px;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .worker span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .sixpack {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(150px, 1fr));
+      gap: 10px;
+      min-width: 980px;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .pack {
+      border: 1px solid var(--ink);
+      padding: 11px;
+      background: var(--paper);
+      min-height: 90px;
+    }
+
+    .pack strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: 12px;
+      margin-bottom: 8px;
+      color: var(--blue);
+    }
+
+    .pack p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .timeline {
+      min-width: 1120px;
+      display: grid;
+      grid-template-columns: repeat(8, minmax(120px, 1fr));
+      gap: 0;
+      align-items: stretch;
+      border: 2px solid var(--ink);
+    }
+
+    .step {
+      min-height: 220px;
+      padding: 14px;
+      border-right: 1px solid var(--line);
+      background: oklch(0.99 0.004 83);
+      position: relative;
+    }
+
+    .step:nth-child(1), .step:nth-child(2) { background: var(--blue-soft); }
+    .step:nth-child(3), .step:nth-child(4) { background: var(--green-soft); }
+    .step:nth-child(5), .step:nth-child(6) { background: var(--amber-soft); }
+    .step:nth-child(7), .step:nth-child(8) { background: var(--red-soft); }
+    .step:last-child { border-right: 0; }
+
+    .pct {
+      font-family: var(--mono);
+      font-size: 12px;
+      border: 1px solid var(--ink);
+      display: inline-block;
+      padding: 5px 7px;
+      background: var(--paper);
+      margin-bottom: 12px;
+    }
+
+    .step h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .gate {
+      margin-top: 16px;
+      border: 2px solid var(--ink);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      min-width: 1040px;
+    }
+
+    .gate div {
+      padding: 13px;
+      border-right: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .gate div:last-child { border-right: 0; }
+
+    .gate b {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .gate span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      display: block;
+    }
+
+    .content-map {
+      min-width: 1140px;
+      display: grid;
+      grid-template-columns: 280px 280px 1fr 220px;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .node {
+      border: 2px solid var(--ink);
+      background: var(--paper);
+      padding: 16px;
+      position: relative;
+    }
+
+    .node.primary { background: var(--amber-soft); min-height: 210px; }
+    .node.memory { background: var(--blue-soft); min-height: 210px; }
+    .node.feedback { background: var(--green-soft); min-height: 210px; }
+
+    .node h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    .node p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .node:after {
+      content: "";
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      width: 20px;
+      height: 2px;
+      background: var(--ink);
+    }
+
+    .node.feedback:after { display: none; }
+
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .platform {
+      border: 1px solid var(--line);
+      padding: 12px;
+      min-height: 98px;
+      background: var(--violet-soft);
+    }
+
+    .platform:nth-child(2n) { background: var(--red-soft); }
+    .platform:nth-child(3n) { background: var(--green-soft); }
+
+    .platform b {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+    }
+
+    .platform span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      display: block;
+    }
+
+    .bottom-rule {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .rule {
+      border: 1px solid var(--line);
+      padding: 14px;
+      background: oklch(0.99 0.004 83);
+    }
+
+    .rule b {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+    }
+
+    .rule span {
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.4;
+    }
+
+    .orchestration {
+      min-width: 1240px;
+      display: grid;
+      grid-template-columns: 250px 1fr 250px;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .source-stack,
+    .sink-stack {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .source-box,
+    .sink-box {
+      border: 2px solid var(--ink);
+      background: var(--paper);
+      padding: 14px;
+      min-height: 106px;
+    }
+
+    .source-box:nth-child(1) { background: var(--amber-soft); }
+    .source-box:nth-child(2) { background: var(--blue-soft); }
+    .source-box:nth-child(3) { background: var(--violet-soft); }
+    .sink-box:nth-child(1) { background: var(--green-soft); }
+    .sink-box:nth-child(2) { background: var(--red-soft); }
+    .sink-box:nth-child(3) { background: var(--blue-soft); }
+
+    .source-box b,
+    .sink-box b {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .source-box span,
+    .sink-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      position: relative;
+    }
+
+    .station {
+      border: 1px solid var(--line);
+      background: oklch(0.99 0.004 83);
+      padding: 13px;
+      min-height: 178px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 8px;
+      position: relative;
+    }
+
+    .station:after {
+      content: "";
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      width: 12px;
+      height: 2px;
+      background: var(--ink);
+    }
+
+    .station:nth-child(4n):after { display: none; }
+
+    .station.spec { background: var(--amber-soft); }
+    .station.context { background: var(--blue-soft); }
+    .station.design { background: var(--violet-soft); }
+    .station.impl { background: var(--green-soft); }
+    .station.verify { background: var(--red-soft); }
+    .station.review { background: var(--paper); }
+    .station.receipt { background: var(--blue-soft); }
+
+    .station code {
+      width: max-content;
+      max-width: 100%;
+      border: 1px solid var(--ink);
+      padding: 5px 7px;
+      background: oklch(0.985 0.006 83);
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .station h3 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.22;
+    }
+
+    .station p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.2px;
+      line-height: 1.42;
+    }
+
+    .station strong {
+      display: block;
+      border-top: 1px dashed oklch(0.58 0.025 252);
+      padding-top: 8px;
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .swimlanes {
+      min-width: 1180px;
+      margin-top: 18px;
+      border: 2px solid var(--ink);
+      display: grid;
+      grid-template-columns: 170px repeat(5, 1fr);
+      background: var(--paper);
+    }
+
+    .lane-cell {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 11px;
+      min-height: 72px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .lane-cell:nth-child(6n) { border-right: 0; }
+    .lane-cell.header {
+      background: var(--soft);
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .lane-cell.role {
+      background: var(--blue-soft);
+      font-weight: 800;
+    }
+
+    .lane-cell span {
+      color: var(--muted);
+      display: block;
+      margin-top: 4px;
+    }
+
+    .deep-system {
+      min-width: 1320px;
+      display: grid;
+      grid-template-columns: 230px 1fr 300px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .boss-lane,
+    .artifact-lane {
+      display: grid;
+      gap: 12px;
+    }
+
+    .boss-card,
+    .artifact-card {
+      border: 2px solid var(--ink);
+      padding: 14px;
+      background: var(--paper);
+    }
+
+    .boss-card:nth-child(1) { background: var(--amber-soft); }
+    .boss-card:nth-child(2) { background: var(--red-soft); }
+    .boss-card:nth-child(3) { background: var(--blue-soft); }
+    .artifact-card:nth-child(1) { background: var(--green-soft); }
+    .artifact-card:nth-child(2) { background: var(--violet-soft); }
+    .artifact-card:nth-child(3) { background: var(--blue-soft); }
+    .artifact-card:nth-child(4) { background: var(--amber-soft); }
+
+    .boss-card b,
+    .artifact-card b {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .boss-card span,
+    .artifact-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    .deep-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .deep-card {
+      border: 1px solid var(--line);
+      background: oklch(0.99 0.004 83);
+      padding: 13px;
+      min-height: 184px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 8px;
+    }
+
+    .deep-card.ask { background: var(--amber-soft); }
+    .deep-card.specify { background: var(--blue-soft); }
+    .deep-card.arch { background: var(--violet-soft); }
+    .deep-card.route { background: var(--green-soft); }
+    .deep-card.prompt { background: var(--red-soft); }
+    .deep-card.worker { background: oklch(0.98 0.018 158); }
+    .deep-card.review2 { background: oklch(0.985 0.006 83); }
+    .deep-card.memory2 { background: var(--blue-soft); }
+    .deep-card.learn { background: var(--amber-soft); }
+
+    .deep-card code {
+      width: max-content;
+      max-width: 100%;
+      border: 1px solid var(--ink);
+      padding: 5px 7px;
+      background: var(--paper);
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .deep-card h3 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .deep-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.2px;
+      line-height: 1.42;
+    }
+
+    .deep-card strong {
+      display: block;
+      border-top: 1px dashed oklch(0.58 0.025 252);
+      padding-top: 8px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .prompt-stack {
+      min-width: 1200px;
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: 250px repeat(5, 1fr);
+      border: 2px solid var(--ink);
+      background: var(--paper);
+    }
+
+    .prompt-cell {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
+      min-height: 86px;
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .prompt-cell:nth-child(6n) { border-right: 0; }
+    .prompt-cell.head {
+      background: var(--soft);
+      font-weight: 850;
+    }
+
+    .prompt-cell.layer-name {
+      background: var(--blue-soft);
+      font-weight: 850;
+    }
+
+    .prompt-cell b {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .prompt-cell span {
+      color: var(--muted);
+      display: block;
+    }
+
+    .sources {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      background: oklch(0.99 0.004 83);
+      padding: 14px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .sources b {
+      color: var(--ink);
+    }
+
+    @media (max-width: 900px) {
+      .page { width: min(100vw - 22px, 1480px); padding-top: 20px; }
+      header { grid-template-columns: 1fr; }
+      .stamp { min-width: 0; }
+      .principles { grid-template-columns: 1fr 1fr; }
+      .section-head { grid-template-columns: 42px 1fr; }
+      .tag { grid-column: 1 / -1; width: max-content; }
+      .panel { padding: 14px; }
+      .bottom-rule { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .principles { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <h1>一人公司 AI 操作系统架构</h1>
+        <p class="subtitle">一个窗口就是一个员工，一个员工只拿一个 bounded task。上下文不许无限膨胀，交付必须留下 receipt，所有复利回流到本地记忆和公开资产。</p>
+      </div>
+      <div class="stamp">
+        <strong>Operating Posture</strong>
+        <span>CEO = 总架构师 + 总编辑 + 最终签字人</span>
+      </div>
+    </header>
+
+    <div class="principles">
+      <div class="principle">
+        <b>一个窗口，一个角色</b>
+        <p>不设“全栈万能员工”。前端、后端、审查、增长、写作都拆成独立执行窗口。</p>
+      </div>
+      <div class="principle">
+        <b>60% 上下文闸门</b>
+        <p>45% 前完成主要执行，55% 开始验证和压缩，60% 前必须交接或退出。</p>
+      </div>
+      <div class="principle">
+        <b>SACP 追责链</b>
+        <p>每个任务以 receipt 收口：做了什么、证据在哪、谁接手、不能声称什么。</p>
+      </div>
+      <div class="principle">
+        <b>复利回流</b>
+        <p>文字、代码、销售反馈、平台数据都回写 Obsidian，形成下一轮判断材料。</p>
+      </div>
+    </div>
+
+    <section>
+      <div class="section-head">
+        <div class="num">01</div>
+        <div>
+          <h2>组织架构：控制平面 + 执行池</h2>
+          <p>CEO 不直接塞满一个全栈窗口。PMO 先拆任务，再为每个窗口绑定 role、tool、skill、prompt、memory 和 receipt。</p>
+        </div>
+        <div class="tag">ORG / ROLE MAP</div>
+      </div>
+      <div class="panel">
+        <div class="org">
+          <aside class="ceo">
+            <h3 class="role-title">你<br>CEO / Architect / Editor</h3>
+            <p class="role-desc">负责方向、取舍、最终发送、公开叙事和资源配置。你不当全职执行员，你制造高质量判断。</p>
+            <ul class="micro-list">
+              <li>每天 1 段原始思考</li>
+              <li>每天 1 个明确决策</li>
+              <li>每天 1 个可交付任务种子</li>
+            </ul>
+          </aside>
+
+          <div class="layers">
+            <div class="layer">
+              <div class="layer-label">控制平面<small>负责拆分、预算、路由、追责</small></div>
+              <div class="workers">
+                <div class="worker control"><b>PMO Router</b><span>拆任务、排优先级、选择下一个窗口</span></div>
+                <div class="worker control"><b>Context Budget Manager</b><span>控制 60% 上下文闸门，禁止膨胀</span></div>
+                <div class="worker control"><b>SACP Auditor</b><span>检查 receipt、证据、next owner</span></div>
+                <div class="worker control"><b>Memory Curator</b><span>维护 Obsidian 本体和 dashboard</span></div>
+              </div>
+            </div>
+
+            <div class="layer">
+              <div class="layer-label">技术执行池<small>一个技术任务，一个员工</small></div>
+              <div class="workers">
+                <div class="worker tech"><b>Frontend Worker</b><span>界面、交互、截图验收</span></div>
+                <div class="worker tech"><b>Backend Worker</b><span>API、数据、任务队列、测试</span></div>
+                <div class="worker tech"><b>Evidence Worker</b><span>HTML、截图、hash、manifest</span></div>
+                <div class="worker tech"><b>Code Review Worker</b><span>bug、回归、缺失测试、阻断项</span></div>
+              </div>
+            </div>
+
+            <div class="layer">
+              <div class="layer-label">增长内容池<small>你的输出是轴，平台是适配器</small></div>
+              <div class="workers">
+                <div class="worker growth"><b>Core Thought Writer</b><span>整理你的原始思考，形成主文</span></div>
+                <div class="worker growth"><b>Platform Adapters</b><span>X、Reddit、YouTube、抖音、B站、小红书</span></div>
+                <div class="worker growth"><b>Website Publisher</b><span>长文、案例、方法论沉淀</span></div>
+                <div class="worker growth"><b>Analytics Reviewer</b><span>读反馈，回流选题和产品判断</span></div>
+              </div>
+            </div>
+
+            <div class="layer">
+              <div class="layer-label">商业执行池<small>现金流优先，但不能越过证据边界</small></div>
+              <div class="workers">
+                <div class="worker sales"><b>Lead Research</b><span>客户名单、画像、联系路径</span></div>
+                <div class="worker sales"><b>Outbound Copy</b><span>首触达、跟进、异议处理</span></div>
+                <div class="worker sales"><b>Proposal / SOW</b><span>报价、范围、交付边界</span></div>
+                <div class="worker sales"><b>Claim Review</b><span>法律、方法论、商业表述红线</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sixpack">
+          <div class="pack"><strong>ROLE</strong><p>窗口身份和不能做什么，比能做什么更重要。</p></div>
+          <div class="pack"><strong>MCP / TOOL</strong><p>只开放当前任务需要的工具，避免工具面过宽。</p></div>
+          <div class="pack"><strong>SKILL</strong><p>绑定执行方法：前端、审查、SACP、写作、销售。</p></div>
+          <div class="pack"><strong>PROMPT</strong><p>只放 task packet，不塞整段历史。</p></div>
+          <div class="pack"><strong>MEMORY</strong><p>最小只读上下文，长记忆在 Obsidian。</p></div>
+          <div class="pack"><strong>RECEIPT</strong><p>完成后留下证据、风险、next owner。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div class="num">02</div>
+        <div>
+          <h2>任务窗口生命周期：60% 上下文内收口</h2>
+          <p>每个窗口都不是聊天，是一次可追责事务。到达上下文闸门后，只能验证、压缩、交接，不能继续扩张任务。</p>
+        </div>
+        <div class="tag">TASK / RECEIPT CHAIN</div>
+      </div>
+      <div class="panel">
+        <div class="timeline">
+          <div class="step">
+            <span class="pct">0-8%</span>
+            <h3>读取任务包</h3>
+            <p>目标、范围、允许工具、验收标准、stop rule。只读最小上下文。</p>
+          </div>
+          <div class="step">
+            <span class="pct">8-15%</span>
+            <h3>绑定角色</h3>
+            <p>确认自己是前端、后端、审查、销售还是写作窗口。拒绝跨角色漂移。</p>
+          </div>
+          <div class="step">
+            <span class="pct">15-35%</span>
+            <h3>主要执行</h3>
+            <p>写代码、生成内容、整理名单、做实验。只完成当前 bounded task。</p>
+          </div>
+          <div class="step">
+            <span class="pct">35-45%</span>
+            <h3>局部自检</h3>
+            <p>运行测试、截图、lint、查证据路径、核对平台文案边界。</p>
+          </div>
+          <div class="step">
+            <span class="pct">45-55%</span>
+            <h3>审查与证据</h3>
+            <p>产出 diff、测试结果、截图、manifest、数据反馈或可发送版本。</p>
+          </div>
+          <div class="step">
+            <span class="pct">55-60%</span>
+            <h3>写 Receipt</h3>
+            <p>Goal、Known facts、Evidence、Next action、Do not、Stop if、Residual risk。</p>
+          </div>
+          <div class="step">
+            <span class="pct">60-75%</span>
+            <h3>只许交接</h3>
+            <p>不得继续扩展需求。只能压缩上下文、生成 handoff、指定 next owner。</p>
+          </div>
+          <div class="step">
+            <span class="pct">75%+</span>
+            <h3>强制退出</h3>
+            <p>停止执行，交给新窗口。旧窗口的价值只剩状态压缩和风险提示。</p>
+          </div>
+        </div>
+
+        <div class="gate">
+          <div><b>进入条件</b><span>任务有 owner、边界、验收、工具列表、输入路径。</span></div>
+          <div><b>完成条件</b><span>有可审查交付物，不是“我觉得完成了”。</span></div>
+          <div><b>追责条件</b><span>SACP receipt 能说明证据、失败、风险和下一步。</span></div>
+          <div><b>升级条件</b><span>跨角色、上下文超限、证据缺失、外部承诺，需要 CEO 决策。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div class="num">03</div>
+        <div>
+          <h2>内容复利矩阵：你写一份，平台各自适配</h2>
+          <p>你的原始思考留在本地，长文进入个人网站，平台账号只做分发和反馈采集。不要让平台反过来控制你的思想结构。</p>
+        </div>
+        <div class="tag">CONTENT / COMPOUND LOOP</div>
+      </div>
+      <div class="panel">
+        <div class="content-map">
+          <div class="node primary">
+            <h3>每日原始思考</h3>
+            <p>你今天看到什么、判断什么、改变什么。它是所有平台内容和产品任务的源头。</p>
+          </div>
+          <div class="node memory">
+            <h3>本地思想本体</h3>
+            <p>Obsidian 保存概念、决策、项目复盘、证据索引。个人网站保存可公开长文。</p>
+          </div>
+          <div class="platforms">
+            <div class="platform"><b>X</b><span>观点切片、判断、进展、公开学习</span></div>
+            <div class="platform"><b>Reddit</b><span>问题、案例、讨论、反驳收集</span></div>
+            <div class="platform"><b>YouTube</b><span>长脚本、故事线、系统解释</span></div>
+            <div class="platform"><b>抖音</b><span>强钩子、短判断、冲突点</span></div>
+            <div class="platform"><b>B站</b><span>教程、系统搭建、深度解释</span></div>
+            <div class="platform"><b>小红书</b><span>人设、方法、成长记录、可视化笔记</span></div>
+          </div>
+          <div class="node feedback">
+            <h3>反馈回流</h3>
+            <p>评论、私信、客户线索、收藏、转化、质疑，回到 PMO 和 Obsidian，驱动下一轮项目选择。</p>
+          </div>
+        </div>
+
+        <div class="bottom-rule">
+          <div class="rule"><b>核心资产</b><span>不是平台账号，是你的本地思想库、网站长文、项目证据和可复用工作流。</span></div>
+          <div class="rule"><b>平台角色</b><span>平台是适配器和传感器。它们帮你分发，也帮你测量市场的真实反应。</span></div>
+          <div class="rule"><b>每日闭环</b><span>原始文字、一个决策、一个任务种子、一个 receipt，明天从反馈继续进化。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div class="num">04</div>
+        <div>
+          <h2>全栈能力编排：把 skill 拆成工位，不塞进一个窗口</h2>
+          <p>本地 skill 的价值不是“全栈一把梭”，而是组成流水线。每一站只拿当前需要的上下文，产出下一站能接的 receipt。</p>
+        </div>
+        <div class="tag">SKILL / TOOL ORCHESTRATION</div>
+      </div>
+      <div class="panel">
+        <div class="orchestration">
+          <div class="source-stack">
+            <div class="source-box"><b>CEO Intent</b><span>原始想法、产品判断、要解决的真实问题。不能直接喂给实现窗口。</span></div>
+            <div class="source-box"><b>Project Memory</b><span>AGENTS/CLAUDE、spec、dashboard、最近 receipt。只取最小切片。</span></div>
+            <div class="source-box"><b>Evidence Tail</b><span>测试失败、截图、用户反馈、代码 diff、平台数据，只保留最新证据。</span></div>
+          </div>
+
+          <div class="pipeline">
+            <div class="station spec">
+              <code>spec-driven-development</code>
+              <h3>01 Spec Gate</h3>
+              <p>把模糊需求变成 Objective、Commands、Boundaries、Success Criteria。</p>
+              <strong>Output: feature spec + acceptance criteria</strong>
+            </div>
+            <div class="station context">
+              <code>context-engineering</code>
+              <h3>02 Context Slice</h3>
+              <p>选择规则文件、相关 spec、源文件、测试文件和一条相似模式。</p>
+              <strong>Output: minimal context pack</strong>
+            </div>
+            <div class="station context">
+              <code>token-prompt-compiler</code>
+              <h3>03 Worker Packet</h3>
+              <p>压缩成人能审、机器能执行的 Task Packet，设置 stop rule。</p>
+              <strong>Output: bounded task packet</strong>
+            </div>
+            <div class="station design">
+              <code>impeccable / frontend-design</code>
+              <h3>04 Design Worker</h3>
+              <p>需要 UI 时才进入。产出界面方向、交互、组件边界和视觉验收。</p>
+              <strong>Output: UI plan / HTML / component spec</strong>
+            </div>
+            <div class="station impl">
+              <code>karpathy-skill</code>
+              <h3>05 Implementation</h3>
+              <p>Codex 做小而硬的实现。少改文件，不乱抽象，改完跑验证。</p>
+              <strong>Output: diff + commands run</strong>
+            </div>
+            <div class="station verify">
+              <code>webapp-testing</code>
+              <h3>06 Browser / QA</h3>
+              <p>前端或产品界面必须截图、交互验证、console 检查、响应式检查。</p>
+              <strong>Output: screenshots + pass/fail notes</strong>
+            </div>
+            <div class="station review">
+              <code>Claude Code Review</code>
+              <h3>07 Review Window</h3>
+              <p>Claude 只审查：bug、回归、测试缺口、复杂度、边界，不负责实现。</p>
+              <strong>Output: findings + required fixes</strong>
+            </div>
+            <div class="station receipt">
+              <code>agent-chassis / audit-evolution</code>
+              <h3>08 Receipt & Handoff</h3>
+              <p>写 SACP receipt，更新 dashboard，指定 next owner，必要时切新窗口。</p>
+              <strong>Output: receipt + next task</strong>
+            </div>
+          </div>
+
+          <div class="sink-stack">
+            <div class="sink-box"><b>Codebase</b><span>只接收通过 review 和验证的改动。实现窗口不能自己宣布最终正确。</span></div>
+            <div class="sink-box"><b>Obsidian Memory</b><span>接收决策、receipt、角色规则、项目状态，不接收完整聊天噪音。</span></div>
+            <div class="sink-box"><b>Next Window</b><span>下一棒只拿 role card、task packet、evidence receipt 和必要路径。</span></div>
+          </div>
+        </div>
+
+        <div class="swimlanes">
+          <div class="lane-cell header">窗口角色</div>
+          <div class="lane-cell header">主要模型</div>
+          <div class="lane-cell header">允许技能</div>
+          <div class="lane-cell header">上下文输入</div>
+          <div class="lane-cell header">验证方式</div>
+          <div class="lane-cell header">交付物</div>
+
+          <div class="lane-cell role">PMO / Spec</div>
+          <div class="lane-cell">Codex 或 Claude</div>
+          <div class="lane-cell">spec-driven-development, token-prompt-compiler</div>
+          <div class="lane-cell">CEO intent + current dashboard</div>
+          <div class="lane-cell">CEO 能判断是否做对题</div>
+          <div class="lane-cell">Task Packet</div>
+
+          <div class="lane-cell role">Codex Impl</div>
+          <div class="lane-cell">Codex</div>
+          <div class="lane-cell">karpathy-skill, context-engineering</div>
+          <div class="lane-cell">任务包 + 文件路径 + 测试命令</div>
+          <div class="lane-cell">unit/build/lint/local run</div>
+          <div class="lane-cell">diff + test output</div>
+
+          <div class="lane-cell role">Design / FE</div>
+          <div class="lane-cell">Codex</div>
+          <div class="lane-cell">impeccable, frontend-design, webapp-testing</div>
+          <div class="lane-cell">UI task + visual constraints</div>
+          <div class="lane-cell">screenshot + responsive check</div>
+          <div class="lane-cell">HTML/component + visual receipt</div>
+
+          <div class="lane-cell role">Claude Review</div>
+          <div class="lane-cell">Claude Code</div>
+          <div class="lane-cell">review stance, karpathy-skill</div>
+          <div class="lane-cell">diff + tests + spec only</div>
+          <div class="lane-cell">finding must cite file/line</div>
+          <div class="lane-cell">review receipt</div>
+
+          <div class="lane-cell role">QA / Handoff</div>
+          <div class="lane-cell">Codex</div>
+          <div class="lane-cell">webapp-testing, agent-chassis, audit-evolution</div>
+          <div class="lane-cell">latest receipt + verification target</div>
+          <div class="lane-cell">repro command or screenshot evidence</div>
+          <div class="lane-cell">SACP receipt + next owner</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div class="num">05</div>
+        <div>
+          <h2>需求澄清到执行：老板对齐工位 + Prompt 厚度</h2>
+          <p>这一层专门解决“我到底想要什么”。先由一个 AI 员工和 CEO 博弈清楚目标、约束和技术路径，再派发给实现窗口。</p>
+        </div>
+        <div class="tag">REQUIREMENT / PROMPT / HANDOFF</div>
+      </div>
+      <div class="panel">
+        <div class="deep-system">
+          <div class="boss-lane">
+            <div class="boss-card"><b>CEO Raw Need</b><span>你的直觉、痛点、商业目标、审美偏好、时间限制。这里允许混乱。</span></div>
+            <div class="boss-card"><b>Clarification Bargain</b><span>AI 必须追问：谁用、为什么现在、什么算成功、什么不能做、优先级怎么排。</span></div>
+            <div class="boss-card"><b>CEO Sign-off</b><span>只有经过你确认的 spec、技术路径、角色路由，才能进入执行。</span></div>
+          </div>
+
+          <div class="deep-grid">
+            <div class="deep-card ask">
+              <code>需求澄清员工</code>
+              <h3>01 Boss Interview</h3>
+              <p>用 5 个问题逼近真实需求：用户、结果、约束、证据、截止。不给答案就只做假设表。</p>
+              <strong>Output: clarified intent + assumptions</strong>
+            </div>
+            <div class="deep-card specify">
+              <code>spec-driven-development</code>
+              <h3>02 Product Spec</h3>
+              <p>把口头需求变成目标、非目标、验收标准、边界、命令、风险和 open questions。</p>
+              <strong>Output: CEO-approved spec</strong>
+            </div>
+            <div class="deep-card arch">
+              <code>技术路径员工</code>
+              <h3>03 Architecture Path</h3>
+              <p>确定技术路线：前端、后端、数据、状态、权限、部署、测试。先给方案对比。</p>
+              <strong>Output: implementation path + tradeoffs</strong>
+            </div>
+            <div class="deep-card route">
+              <code>agent-chassis</code>
+              <h3>04 Agent Routing</h3>
+              <p>决定拆几个窗口：设计、前端、后端、测试、review、security、handoff。每个窗口一票。</p>
+              <strong>Output: worker map + dependency order</strong>
+            </div>
+            <div class="deep-card prompt">
+              <code>Prompt Architect</code>
+              <h3>05 Prompt Pack</h3>
+              <p>为每个窗口生成高质量 prompt：身份、任务、输入、工具、验收、禁止项、交付格式。</p>
+              <strong>Output: role-specific prompt stack</strong>
+            </div>
+            <div class="deep-card worker">
+              <code>Codex / Claude</code>
+              <h3>06 Bounded Workers</h3>
+              <p>每个 worker 只执行自己的任务包。Claude Code subagent 思路：独立上下文、专门工具、专门 system prompt。</p>
+              <strong>Output: diff / artifact / content</strong>
+            </div>
+            <div class="deep-card review2">
+              <code>Review Matrix</code>
+              <h3>07 Multi-review</h3>
+              <p>代码 review、设计 review、测试 review、claim review 分开做，不能让实现者审自己。</p>
+              <strong>Output: findings + fix queue</strong>
+            </div>
+            <div class="deep-card memory2">
+              <code>SACP Receipt</code>
+              <h3>08 State Sync</h3>
+              <p>每个窗口结束写 receipt：证据、变更、风险、下一棒。项目状态同步到 dashboard。</p>
+              <strong>Output: handoff + memory update</strong>
+            </div>
+            <div class="deep-card learn">
+              <code>CEO Learning Loop</code>
+              <h3>09 Engineer Apprentice</h3>
+              <p>把工程痛点转成学习任务：今天为什么卡、读哪个文件、补哪个概念、亲手做哪个小改。</p>
+              <strong>Output: learning receipt</strong>
+            </div>
+          </div>
+
+          <div class="artifact-lane">
+            <div class="artifact-card"><b>Role Library</b><span>每个角色都有版本：mission、can/cannot、tools、skills、output、escalation。</span></div>
+            <div class="artifact-card"><b>Prompt Library</b><span>沉淀优秀 prompt，不靠临场发挥。每个窗口都有可复用模板。</span></div>
+            <div class="artifact-card"><b>Project Sync Board</b><span>当前目标、活跃任务、阻塞、receipt、next owner、审查状态。</span></div>
+            <div class="artifact-card"><b>Memory Filter</b><span>原始思考保留原貌，进入执行系统前必须结构化，避免上下文污染。</span></div>
+          </div>
+        </div>
+
+        <div class="prompt-stack">
+          <div class="prompt-cell head">Prompt 层</div>
+          <div class="prompt-cell head">作用</div>
+          <div class="prompt-cell head">应该包含</div>
+          <div class="prompt-cell head">不应该包含</div>
+          <div class="prompt-cell head">谁维护</div>
+          <div class="prompt-cell head">交付检查</div>
+
+          <div class="prompt-cell layer-name">Company Constitution</div>
+          <div class="prompt-cell">公司级原则</div>
+          <div class="prompt-cell">CEO 优先级、证据边界、角色总表</div>
+          <div class="prompt-cell">临时任务细节</div>
+          <div class="prompt-cell">CEO + Memory Curator</div>
+          <div class="prompt-cell">半年内稳定，不频繁改</div>
+
+          <div class="prompt-cell layer-name">Project Rules</div>
+          <div class="prompt-cell">项目级上下文</div>
+          <div class="prompt-cell">AGENTS/CLAUDE、命令、目录、测试、禁区</div>
+          <div class="prompt-cell">整段聊天历史</div>
+          <div class="prompt-cell">PMO + Tech Lead Worker</div>
+          <div class="prompt-cell">路径真实，命令可执行</div>
+
+          <div class="prompt-cell layer-name">Role Card</div>
+          <div class="prompt-cell">窗口身份</div>
+          <div class="prompt-cell">Mission、Can do、Cannot do、tools、skill</div>
+          <div class="prompt-cell">别的角色的工作</div>
+          <div class="prompt-cell">CEO 微调批准</div>
+          <div class="prompt-cell">角色边界清晰</div>
+
+          <div class="prompt-cell layer-name">Task Packet</div>
+          <div class="prompt-cell">当前任务</div>
+          <div class="prompt-cell">Goal、scope、files、acceptance、verify、stop</div>
+          <div class="prompt-cell">无关项目背景</div>
+          <div class="prompt-cell">需求澄清员工</div>
+          <div class="prompt-cell">单窗口可完成</div>
+
+          <div class="prompt-cell layer-name">Evidence Tail</div>
+          <div class="prompt-cell">最新事实</div>
+          <div class="prompt-cell">test output、screenshots、diff、review findings</div>
+          <div class="prompt-cell">长日志、猜测、情绪</div>
+          <div class="prompt-cell">SACP Auditor</div>
+          <div class="prompt-cell">可定位、可复现</div>
+
+          <div class="prompt-cell layer-name">Receipt</div>
+          <div class="prompt-cell">交接状态</div>
+          <div class="prompt-cell">Done、Changed、Evidence、Risks、Next owner</div>
+          <div class="prompt-cell">自夸式总结</div>
+          <div class="prompt-cell">每个 worker</div>
+          <div class="prompt-cell">下一棒能直接开工</div>
+        </div>
+
+        <div class="sources">
+          <b>官方经验转译：</b>
+          Claude Code subagents 强调独立上下文、可配置工具和专门 system prompt；OpenAI Agents SDK 的 handoff 支持 schema 和 history filter；OpenAI Codex 的 AGENTS.md 用作项目级指导；GitHub Copilot 的 repo instructions 和任务描述实践强调清晰问题、上下文文件、验收标准和限制。这里把它们压成你的本地工作流：先澄清，再写 spec，再定技术路径，再拆窗口，再写 prompt，再执行和审查。
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
