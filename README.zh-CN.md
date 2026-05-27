@@ -16,6 +16,10 @@
 
 CEO 负责方向、角色微调、最终承诺、公开叙事和资源配置。AI 员工只在明确边界内执行。
 
+## 5 分钟快速上手
+
+用这个仓库快速理解：一人创始人如何把 AI 工作拆成安全、可审查、可交接的任务。最快路径：打开架构图看全局，读 CEO 入口理解工作循环，再选一个角色卡对照理解。5 分钟内建立整体认知。
+
 ## 目录结构
 
 | 路径 | 用途 |
@@ -24,7 +28,7 @@ CEO 负责方向、角色微调、最终承诺、公开叙事和资源配置。A
 | `01_Architecture/` | 总架构、上下文规则、执行分层 |
 | `02_Role_Library/` | 角色库和角色卡模板 |
 | `03_Prompt_Library/` | Prompt Stack 和 worker prompt 模板 |
-| `04_Task_Packets/` | 任务包模板 |
+| `04_Task_Packets/` | 任务包模板和已填实例 |
 | `05_Receipts/` | SACP 风格 receipt 模板 |
 | `06_Project_Sync/` | 项目同步板 |
 | `07_Learning/` | CEO 全栈学习闭环 |
@@ -33,10 +37,15 @@ CEO 负责方向、角色微调、最终承诺、公开叙事和资源配置。A
 
 ## 从这里开始
 
-1. 读 [00_CEO/CEO_START_HERE.zh-CN.md](00_CEO/CEO_START_HERE.zh-CN.md)。
-2. 读 [01_Architecture/AI_COMPANY_OS_ARCHITECTURE.zh-CN.md](01_Architecture/AI_COMPANY_OS_ARCHITECTURE.zh-CN.md)。
-3. 用浏览器打开 [09_Visuals/solo_company_architecture.html](09_Visuals/solo_company_architecture.html)。
-4. 先精修三个角色：
+用这条 10 分钟路径判断它是否适合你的工作：
+
+1. 先读上面的 5 分钟快速上手，理解这个仓库能帮你做什么。
+2. 用浏览器打开 [09_Visuals/solo_company_architecture.html](09_Visuals/solo_company_architecture.html)，看全局架构图。
+3. 读 [00_CEO/CEO_START_HERE.zh-CN.md](00_CEO/CEO_START_HERE.zh-CN.md)，理解 CEO 工作循环和核心原则。
+4. 读 [04_Task_Packets/EXAMPLE_TASK_PACKET.md](04_Task_Packets/EXAMPLE_TASK_PACKET.md)，再对照空任务包模板理解每个字段。
+5. 打开 [02_Role_Library/ROLE_LIBRARY_INDEX.zh-CN.md](02_Role_Library/ROLE_LIBRARY_INDEX.zh-CN.md)，选一个与你当前需求最接近的角色，判断这套方法是否适合你的场景。
+
+之后再精修三个角色：
    - CEO Clarification Partner（CEO 需求澄清伙伴）
    - Technical Path Architect（技术路径架构师）
    - Claude Code Reviewer（Claude 代码审查员）
@@ -53,3 +62,5 @@ CEO 负责方向、角色微调、最终承诺、公开叙事和资源配置。A
 ## 当前状态
 
 这是初始总架构 repo。角色卡和 prompt 模板故意保留为可演化版本，后续应由 CEO 逐步微调。
+
+当前阶段：公开参考。欢迎通过 issue 交流反馈，暂不接受 PR。欢迎 fork 并自行修改适配。
