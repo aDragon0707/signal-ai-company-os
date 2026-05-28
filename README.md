@@ -24,6 +24,8 @@ The CEO owns direction, role tuning, final commitments, public narrative, and re
 
 Use this repo to understand how a solo founder can split AI work safely. Fastest path: open the architecture map, read the CEO entry, then compare one role card in the role library. In 5 minutes, you should have a whole-system map.
 
+To test whether it fits your work, use the 10-minute path below and fill one task packet with a real task of your own.
+
 | Path | Purpose |
 |---|---|
 | `00_CEO/` | CEO entry, daily loop, decision authority |
@@ -31,7 +33,7 @@ Use this repo to understand how a solo founder can split AI work safely. Fastest
 | `02_Role_Library/` | Role library and role card templates |
 | `03_Prompt_Library/` | Prompt stack and worker prompt templates |
 | `04_Task_Packets/` | Task packet templates and a filled example |
-| `05_Receipts/` | SACP-style receipt templates |
+| `05_Receipts/` | SACP-style receipt templates and a filled example |
 | `06_Project_Sync/` | Project sync board |
 | `07_Learning/` | CEO full-stack learning loop |
 | `08_Info_Flow/` | CEO information filtering system |
@@ -45,7 +47,9 @@ Use this 10-minute path to understand whether the system fits your work:
 2. Open [09_Visuals/solo_company_architecture.html](09_Visuals/solo_company_architecture.html) to see the full operating map.
 3. Read [00_CEO/CEO_START_HERE.md](00_CEO/CEO_START_HERE.md) to understand the CEO loop and core principles.
 4. Read [04_Task_Packets/EXAMPLE_TASK_PACKET.md](04_Task_Packets/EXAMPLE_TASK_PACKET.md), then compare it with the empty task packet template.
-5. Open [02_Role_Library/ROLE_LIBRARY_INDEX.md](02_Role_Library/ROLE_LIBRARY_INDEX.md), choose one role closest to your current need, and decide whether this method fits your scenario.
+5. Copy [04_Task_Packets/TASK_PACKET_TEMPLATE.md](04_Task_Packets/TASK_PACKET_TEMPLATE.md) into your AI window and fill it with one real task of your own.
+6. Read [05_Receipts/EXAMPLE_RECEIPT.md](05_Receipts/EXAMPLE_RECEIPT.md) to see what a completed handoff looks like.
+7. Open [02_Role_Library/ROLE_LIBRARY_INDEX.md](02_Role_Library/ROLE_LIBRARY_INDEX.md), choose one role closest to your current need, and decide whether this method fits your scenario.
 
 After that, tune the first three active roles:
    - CEO Clarification Partner
@@ -65,4 +69,10 @@ After that, tune the first three active roles:
 
 This is an initial architecture repo. Role cards and prompt templates are intentionally designed to be tuned by the CEO over time.
 
-Current stage: public reference. Feedback via issues is welcome, PRs are not being accepted yet. You are welcome to fork and adapt the system for your own use.
+Current stage: public reference. Feedback via issues is welcome, especially:
+
+- What was unclear on first read?
+- Where did you get stuck when trying to fill a task packet?
+- Which template looked useful enough to adapt?
+
+PRs are not being accepted yet. You are welcome to fork and adapt the system for your own use.

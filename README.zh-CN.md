@@ -20,6 +20,8 @@ CEO 负责方向、角色微调、最终承诺、公开叙事和资源配置。A
 
 用这个仓库快速理解：一人创始人如何把 AI 工作拆成安全、可审查、可交接的任务。最快路径：打开架构图看全局，读 CEO 入口理解工作循环，再选一个角色卡对照理解。5 分钟内建立整体认知。
 
+如果要判断它是否适合你的工作，请继续走下面的 10 分钟路径，并用自己的真实任务填一份任务包。
+
 ## 目录结构
 
 | 路径 | 用途 |
@@ -29,7 +31,7 @@ CEO 负责方向、角色微调、最终承诺、公开叙事和资源配置。A
 | `02_Role_Library/` | 角色库和角色卡模板 |
 | `03_Prompt_Library/` | Prompt Stack 和 worker prompt 模板 |
 | `04_Task_Packets/` | 任务包模板和已填实例 |
-| `05_Receipts/` | SACP 风格 receipt 模板 |
+| `05_Receipts/` | SACP 风格 receipt 模板和已填示例 |
 | `06_Project_Sync/` | 项目同步板 |
 | `07_Learning/` | CEO 全栈学习闭环 |
 | `08_Info_Flow/` | CEO 信息流筛选系统 |
@@ -43,7 +45,9 @@ CEO 负责方向、角色微调、最终承诺、公开叙事和资源配置。A
 2. 用浏览器打开 [09_Visuals/solo_company_architecture.html](09_Visuals/solo_company_architecture.html)，看全局架构图。
 3. 读 [00_CEO/CEO_START_HERE.zh-CN.md](00_CEO/CEO_START_HERE.zh-CN.md)，理解 CEO 工作循环和核心原则。
 4. 读 [04_Task_Packets/EXAMPLE_TASK_PACKET.md](04_Task_Packets/EXAMPLE_TASK_PACKET.md)，再对照空任务包模板理解每个字段。
-5. 打开 [02_Role_Library/ROLE_LIBRARY_INDEX.zh-CN.md](02_Role_Library/ROLE_LIBRARY_INDEX.zh-CN.md)，选一个与你当前需求最接近的角色，判断这套方法是否适合你的场景。
+5. 把 [04_Task_Packets/TASK_PACKET_TEMPLATE.md](04_Task_Packets/TASK_PACKET_TEMPLATE.md) 复制到你的 AI 窗口里，用自己的一个真实任务填一份。
+6. 读 [05_Receipts/EXAMPLE_RECEIPT.md](05_Receipts/EXAMPLE_RECEIPT.md)，看一次完成后的交接单长什么样。
+7. 打开 [02_Role_Library/ROLE_LIBRARY_INDEX.zh-CN.md](02_Role_Library/ROLE_LIBRARY_INDEX.zh-CN.md)，选一个与你当前需求最接近的角色，判断这套方法是否适合你的场景。
 
 之后再精修三个角色：
    - CEO Clarification Partner（CEO 需求澄清伙伴）
@@ -63,4 +67,10 @@ CEO 负责方向、角色微调、最终承诺、公开叙事和资源配置。A
 
 这是初始总架构 repo。角色卡和 prompt 模板故意保留为可演化版本，后续应由 CEO 逐步微调。
 
-当前阶段：公开参考。欢迎通过 issue 交流反馈，暂不接受 PR。欢迎 fork 并自行修改适配。
+当前阶段：公开参考。欢迎通过 issue 交流反馈，尤其欢迎告诉我：
+
+- 第一眼哪里看不懂？
+- 复制任务包模板时卡在哪里？
+- 哪个模板看起来最值得你改造使用？
+
+暂不接受 PR。欢迎 fork 并自行修改适配。
